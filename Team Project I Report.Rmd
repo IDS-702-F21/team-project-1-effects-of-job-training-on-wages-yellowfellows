@@ -4,7 +4,6 @@ author: "Athena Liu, Anna Dai, Moritz Wilksch, Dauren Bizhanov, Himangshu Ray Bh
 date: "9/25/2021"
 output:
   pdf_document: default
-  html_document: default
 ---
 # Summary
 Part 1
