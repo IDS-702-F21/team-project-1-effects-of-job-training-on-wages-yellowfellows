@@ -22,6 +22,7 @@ data$black <- as.factor(data$black)
 data$hispan <- as.factor(data$hispan)
 data$married <- as.factor(data$married)
 data$nodegree <- as.factor(data$nodegree)
+data$diff_re <- data$re78 - data$re75
 
 
 ##########################################################################
@@ -32,6 +33,9 @@ data$nodegree <- as.factor(data$nodegree)
 # Single variables
 ggplot(data, aes(x=re78)) + geom_histogram() # skewed to the right
 ggplot(data, aes(x=log(re78))) + geom_histogram()
+
+ggplot(data, aes(x=age)) + geom_histogram()
+ggplot(data, aes(x=educ)) + geom_histogram(bins = 15)
 
 ggplot(data, aes(x=treat, y=re78)) + geom_boxplot()
 
@@ -86,7 +90,8 @@ plot(baseline_model)
 # Model selection
 # Step AIC:
 null_model <- lm(re78 ~ treat, data=data)
-full_model <- lm(re78 ~ treat + age + educ + black + hispan + married + nodegree,
+full_model <- lm(re78 ~ treat + age + educ + black + hispan +
+                   married + nodegree + re74,
                  data=data)
 step_model <- step(null_model,
                    scope=formula(full_model),
@@ -118,6 +123,32 @@ step_model2 <- step(null_model,
                     trace=0)
 summary(step_model2)    # Interaction term wasn't chosen
 
+# Log age
+log_age_model <- lm(re78 ~ treat + educ + married + black + log(age), data=data)
+summary(log_age_model)
+
+# Model without outliers
+data_wo <- data[-c(132, 182, 611),]
+model_wo <- lm(re78 ~ treat + educ + married + black + age, data=data_wo)
+
+# Adding re75
+model_w75 <- lm(re78 ~ treat + educ + married + black + age + re75, data=data)
+
+# Model diff re78 re75
+null_model_d <- lm(diff_re ~ treat, data=data)
+full_model_d <- lm(diff_re ~ treat + age + educ + black + hispan +
+                   married + nodegree,
+                 data=data)
+step_model_d <- step(null_model,
+                   scope=formula(full_model_d),
+                   direction='both',
+                   trace=0)
+
+# Model with race and treat
+int_model <- lm(re78 ~ treat + re74 + educ + black +
+                  hispan * treat, data=data)
+summary(int_model)
+anova(step_model, int_model) # no interaction between race and treat
 
 ##########################################################################
 ############################### 3.Model assessment #######################
@@ -125,14 +156,55 @@ summary(step_model2)    # Interaction term wasn't chosen
 
 
 summary(step_model)                   
-plot(step_model, which=1)             # normality assumption?
-plot(step_model, which=2)
+plot(step_model, which=1)             # equal variance and independence assum problem
+plot(step_model, which=2)             # normality assumption?
 plot(step_model, which=3)
 plot(step_model, which=4)             # no influential points
 plot(step_model, which=5)             # several outliers
 plot(data$educ, step_model$residuals) # linearity assumption holds
 plot(data$age, step_model$residuals)
 vif(step_model)                       # no multicollinearity
+
+# Log_age model
+plot(log_age_model, which=1)             
+plot(log_age_model, which=2)
+plot(log_age_model, which=3)
+plot(log_age_model, which=4)             
+plot(log_age_model, which=5)             
+plot(data$educ, log_age_model$residuals) 
+plot(log(data$age), log_age_model$residuals)
+vif(step_model)
+
+# Without outliers model
+plot(model_wo, which=1)             
+plot(model_wo, which=2)
+plot(model_wo, which=3)
+plot(model_wo, which=4)            
+plot(model_wo, which=5)             
+plot(data_wo$educ, model_wo$residuals) 
+plot(data_wo$age, model_wo$residuals)
+vif(step_model)
+
+# Model with additional predictor
+plot(model_wo, which=1)             
+plot(model_wo, which=2)
+plot(model_wo, which=3)
+plot(model_wo, which=4)            
+plot(model_wo, which=5)             
+plot(data_wo$educ, model_wo$residuals) 
+plot(data_wo$age, model_wo$residuals)
+vif(step_model)
+
+# Diff model
+plot(step_model_d, which=1)             
+plot(step_model_d, which=2)
+plot(step_model_d, which=3)
+plot(step_model_d, which=4)             
+plot(step_model_d, which=5)             
+plot(data$educ, step_model_d$residuals) 
+plot(log(data$age), step_model_d$residuals)
+vif(step_model_d)
+summary(step_model_d)
 
 
 ##########################################################################
@@ -178,17 +250,3 @@ plot(data$age, full_model$residuals)
 plot(data$educ, full_model$residuals)
 
 new_model1 <- lm(re78 ~ treat + married + educ + black, data=data)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
