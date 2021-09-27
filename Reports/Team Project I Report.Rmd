@@ -1,0 +1,79 @@
+---
+title: "IDS702 Team Project I Yellow"
+author: "Athena Liu, Anna Dai, Moritz Wilksch, Dauren Bizhanov, Himangshu Ray Bhantana"
+date: "9/25/2021"
+output:
+  pdf_document: default
+---
+# Summary
+Part 1
+Part 2
+
+# Introduction
+re78 response, control for re74. It is used to capture the before and after effect of the treatment
+
+# Data
+uni variate, check all variables individually against re78 (response). And only a few that's interesting 
+black vs. re78
+married vs. re78
+
+any interactions with treatment,
+re78 vs treatment by black and non-black
+
+
+# Model
+
+## Part I
+model experimented with (baseline model base on EDA)
+baseline_model <- lm(re78 ~ treat + married + black + black*treat, data=data) (reference)
+started without re74, used predictors we found interesting based on the EDA. model really bad
+
+Used AIC model selection algorithm
+null model, just treatment
+full model, all variables but not interactions
+Forward, backward, and step wise - backward gave constant model, so examine forward and step wise model only. They gave the same model. Also not looking hot. R squared is not good, actual shape of residual plot not good, assumptions not satisfied
+
+Performed another AIC step wise. same null model, full model now includes any interactions with treatment and predictors that we found significant previously. No interactions were kept. 
+
+At this point, we looked at transformation. And, to eliminate the effects of 0 in the data, we added one to all the points in re78. Then we log transformation re78. But, the results were even more horrifying. 
+
+Final model.
+re74, that what improved the model.
+
+How did we spotted the outliers? Cook distance, spot high leverage outlier, not high influence
+Outliers removed. Waiting for new plot on Monday. Index specific outlier, what they are, why is it okay to remove them?
+
+Our final model is looking goooooood now. Talk about assumptions again. Why is it better? It use to be 0.03 which is complete trash. Lol even 0.14 is not good, we feel done with this model. 
+
+model interpretation: 
+Every dollar increased in pre-treatment earnings in 1974 
+
+
+-----------------TODO center data, remove outliers--------------------
+
+Call:
+lm(formula = re78 ~ treat + re74 + educ + black, data = data_wo)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-13513  -4808  -1609   3864  28231 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.716e+03  1.110e+03   1.547 0.122463    
+treat1       1.236e+03  7.272e+02   1.700 0.089720 .  
+re74         3.605e-01  4.392e-02   8.209 1.34e-15 ***
+educ         3.435e+02  1.025e+02   3.350 0.000857 ***
+black1      -1.549e+03  6.820e+02  -2.272 0.023460 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 6531 on 606 degrees of freedom
+Multiple R-squared:  0.1463,	Adjusted R-squared:  0.1407 
+F-statistic: 25.97 on 4 and 606 DF,  p-value: < 2.2e-16
+
+
+## Part II
+
+# Conclusion
+
