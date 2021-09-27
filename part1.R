@@ -22,7 +22,7 @@ data$black <- as.factor(data$black)
 data$hispan <- as.factor(data$hispan)
 data$married <- as.factor(data$married)
 data$nodegree <- as.factor(data$nodegree)
-data$diff_re <- data$re78 - data$re75
+data$diff_re <- data$re78 - data$re74
 
 
 ##########################################################################
@@ -34,30 +34,27 @@ data$diff_re <- data$re78 - data$re75
 ggplot(data, aes(x=re78)) + geom_histogram() # skewed to the right
 ggplot(data, aes(x=log(re78))) + geom_histogram()
 
+ggplot(data, aes(x=diff_re)) + geom_histogram()
 ggplot(data, aes(x=age)) + geom_histogram()
 ggplot(data, aes(x=educ)) + geom_histogram(bins = 15)
 
 ggplot(data, aes(x=treat, y=re78)) + geom_boxplot()
-
 ggplot(data, aes(x=age, y=re78)) + geom_point() + geom_jitter()
-
 ggplot(data, aes(x=educ, y=re78)) + geom_point() + geom_jitter()
-
 ggplot(data, aes(x=black, y=re78)) + geom_boxplot()   # ***
-
 ggplot(data, aes(x=hispan, y=re78)) + geom_boxplot()
-
 ggplot(data, aes(x=married, y=re78)) + geom_boxplot() # ***
-
 ggplot(data, aes(x=nodegree, y=re78)) + geom_boxplot()
 
-without_zero <- data[data$re78 > 0, ]
+# Difference between re78 and re74
+ggplot(data, aes(x=treat, y=diff_re)) + geom_boxplot() # **
+ggplot(data, aes(x=age, y=diff_re)) + geom_point() + geom_jitter()
+ggplot(data, aes(x=educ, y=diff_re)) + geom_point() + geom_jitter()
+ggplot(data, aes(x=black, y=diff_re)) + geom_boxplot()   
+ggplot(data, aes(x=hispan, y=diff_re)) + geom_boxplot() # *
+ggplot(data, aes(x=married, y=diff_re)) + geom_boxplot()# * 
+ggplot(data, aes(x=nodegree, y=diff_re)) + geom_boxplot()
 
-ggplot(without_zero, aes(x=age, y=re78, colour=treat)) +
-  geom_point() + geom_jitter()
-
-ggplot(without_zero, aes(x=educ, y=re78, colour=treat)) +
-  geom_point() + geom_jitter()
 
 # Interactions:
 ggplot(data, aes(x=treat, y=re78)) +
@@ -77,8 +74,26 @@ ggplot(data, aes(x=treat, y=re78)) +
   facet_wrap(~nodegree, ncol=4)
 
 
+# Interactions difference:
+ggplot(data, aes(x=treat, y=diff_re)) +
+  geom_boxplot() +
+  facet_wrap(~black, ncol=4)  
+
+ggplot(data, aes(x=treat, y=diff_re)) +
+  geom_boxplot() +
+  facet_wrap(~hispan, ncol=4) 
+
+ggplot(data, aes(x=treat, y=diff_re)) +
+  geom_boxplot() +
+  facet_wrap(~married, ncol=4)
+
+ggplot(data, aes(x=treat, y=diff_re)) +
+  geom_boxplot() +
+  facet_wrap(~nodegree, ncol=4)
+
+
 ##########################################################################
-############################### 2.Model selection ########################
+############################### 2.Model selection Deprecated #############
 ##########################################################################
 
 
@@ -150,6 +165,38 @@ int_model <- lm(re78 ~ treat + re74 + educ + black +
 summary(int_model)
 anova(step_model, int_model) # no interaction between race and treat
 
+
+##########################################################################
+############################### 2.Model selection ########################
+##########################################################################
+
+
+# Model selection
+# Step AIC:
+null_model <- lm(diff_re ~ treat, data=data)
+full_model <- lm(diff_re ~ treat + age + educ + black + hispan +
+                   married + nodegree,
+                 data=data)
+step_model <- step(null_model,
+                   scope=formula(full_model),
+                   direction='both',
+                   trace=0)
+summary(step_model)
+
+treat_age_int <- lm(diff_re ~ treat + age + married + treat * age, data=data)
+anova(step_model, treat_age_int) # ***
+
+treat_mar_int <- lm(diff_re ~ treat + age + married + treat * married, data=data)
+anova(step_model, treat_mar_int)
+
+mar_age_int <- lm(diff_re ~ treat + age + married + married * age, data=data)
+anova(step_model, mar_age_int)
+
+race <- lm(diff_re ~ treat + age + married + treat * age + black + 
+             black * treat + hispan + treat * hispan, data=data)
+anova(treat_age_int, race)
+
+
 ##########################################################################
 ############################### 3.Model assessment #######################
 ##########################################################################
@@ -206,13 +253,25 @@ plot(log(data$age), step_model_d$residuals)
 vif(step_model_d)
 summary(step_model_d)
 
+# Final model
+plot(treat_age_int, which=1)             
+plot(treat_age_int, which=2)
+plot(treat_age_int, which=3)
+plot(treat_age_int, which=4)             
+plot(treat_age_int, which=5)             
+plot(data$educ, treat_age_int$residuals) 
+plot(data$age, treat_age_int$residuals)
+vif(treat_age_int)
+summary(treat_age_int)
+
 
 ##########################################################################
 ############################### 4. Inference #############################
 ##########################################################################
 
 
-confint(step_model)
+confint(treat_age_int)
+summary(treat_age_int)
 summary(step_model)
 
 
