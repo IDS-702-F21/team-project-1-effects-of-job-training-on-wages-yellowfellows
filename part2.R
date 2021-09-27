@@ -181,4 +181,4 @@ age_int_matrix$byClass[c("Sensitivity","Specificity")]
 summary(age_int)
 confint(age_int)
 exp(confint(age_int))
-
+exp(age_int$coefficients)
