@@ -30,7 +30,6 @@ data$married <- as.factor(data$married)
 data$nodegree <- as.factor(data$nodegree)
 data$pos_income <- as.integer(data$re78 > 0)
 data$pos_income_f <- as.factor(data$pos_income)
-# data$race <- data$black
 
 
 ##########################################################################
@@ -70,6 +69,17 @@ ggplot(data,aes(x=pos_income_f, y=educ, fill=pos_income_f)) +  # **
   scale_fill_brewer(palette="Reds") + 
   theme_classic()
 
+ggplot(data,aes(x=pos_income_f, y=re74, fill=pos_income_f)) +  # **
+  geom_boxplot() +
+  scale_fill_brewer(palette="Reds") + 
+  theme_classic()
+
+binnedplot(x=data$re74, y=data$pos_income,
+           xlab="Pred. probabilities",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
+
+
 # Interactions
 cond_prob(data[data$black == 1,], "pos_income_f",  "treat")    # **  
 cond_prob(data[data$black == 0,], "pos_income_f",  "treat")
@@ -96,49 +106,26 @@ cond_prob(data[data$nodegree == 0,], "pos_income_f",  "treat")
 
 null_model <- glm(pos_income_f ~ treat, data = data, family=binomial)
 full_model <- glm(pos_income_f ~ treat + black + hispan + 
-                    age + educ + married + treat * black + treat * married,
+                    age + educ + married + re74 + nodegree,
                   data=data, family=binomial)
 step_model <- step(null_model, scope = list(lower=null_model, upper=full_model),
                    direction='both', trace=0)
+summary(step_model)
 
-# Model with no interactions
-nointeract_model <- glm(pos_income_f ~ treat + age + black,
-                      data=data, family=binomial)
-anova(step_model, nointeract_model, test='Chisq')  # non significant interaction
-                                                   # treat * black
+# Added interaction
+black_int <- glm(pos_income_f ~ treat + black + 
+                   age + re74 + treat * black,
+                 data=data, family=binomial)
+anova(step_model, black_int, test="Chisq")
 
-step_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(step_model) >= 0.5, "1", "0")),
-                                     data$pos_income_f, positive = "1")
-step_model_matrix$overall["Accuracy"]
-sum(as.integer(data$pos_income)) / nrow(data)
-step_model_matrix$byClass[c("Sensitivity","Specificity")]
+married_int <- glm(pos_income_f ~ treat + black + 
+      age + re74 + treat * married,
+    data=data, family=binomial)
+anova(step_model, married_int, test="Chisq")
 
-roc(data$pos_income_f, fitted(step_model),
-    plot=T, print.thres="best", legacy.axes=T,
-    print.auc =T, col="red3")
-
-step_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(step_model) >= 0.779, "1", "0")),
-                                     data$pos_income_f, positive = "1")
-step_model_matrix$overall["Accuracy"]
-sum(as.integer(data$pos_income)) / nrow(data)
-step_model_matrix$byClass[c("Sensitivity","Specificity")]
-
-
-ni_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(nointeract_model) >= 0.5, "1", "0")),
-                                     data$pos_income_f, positive = "1")
-ni_model_matrix$overall["Accuracy"]
-sum(as.integer(data$pos_income)) / nrow(data)
-ni_model_matrix$byClass[c("Sensitivity","Specificity")]
-
-roc(data$pos_income_f, fitted(nointeract_model),
-    plot=T, print.thres="best", legacy.axes=T,
-    print.auc =T, col="red3")
-
-ni_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(nointeract_model) >= 0.763, "1", "0")),
-                                   data$pos_income_f, positive = "1")
-ni_model_matrix$overall["Accuracy"]
-sum(as.integer(data$pos_income)) / nrow(data)
-ni_model_matrix$byClass[c("Sensitivity","Specificity")]
+hisp_int <- glm(pos_income_f ~ treat + black + age + re74 + treat * hispan,
+                data=data, family=binomial)
+anova(step_model, hisp_int, test="Chisq")
 
 
 ##########################################################################
@@ -152,13 +139,35 @@ binnedplot(x=fitted(step_model),y=rawresid1,
            col.int="red4", ylab="Avg. residuals",
            main="Binned residual plot", col.pts="navy")
 
-rawresid2 <- residuals(nointeract_model, "resp")
-binnedplot(x=fitted(nointeract_model),y=rawresid2,
-           xlab="Pred. probabilities",
+binnedplot(x=data$age,y=rawresid1,
+           xlab="Age",
            col.int="red4", ylab="Avg. residuals",
            main="Binned residual plot", col.pts="navy")
 
+binnedplot(x=data$re74,y=rawresid1,
+           xlab="Age",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
 
 ##########################################################################
 ############################### 4. Inference #############################
 ##########################################################################
+
+
+step_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(step_model) >= 0.5, "1", "0")),
+                                     data$pos_income_f, positive = "1")
+step_model_matrix$overall["Accuracy"]
+sum(as.integer(data$pos_income)) / nrow(data) # baseline
+step_model_matrix$byClass[c("Sensitivity","Specificity")]
+
+roc(data$pos_income_f, fitted(step_model),
+    plot=T, print.thres="best", legacy.axes=T,
+    print.auc =T, col="red3")
+
+step_model_matrix <- confusionMatrix(as.factor(ifelse(fitted(step_model) >= 0.802, "1", "0")),
+                                     data$pos_income_f, positive = "1")
+step_model_matrix$overall["Accuracy"]
+step_model_matrix$byClass[c("Sensitivity","Specificity")]
+
+summary(step_model)
+confint(step_model)
