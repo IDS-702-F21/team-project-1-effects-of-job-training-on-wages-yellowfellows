@@ -35,13 +35,16 @@ Many public policy programs in the United States aimed to help improve personal 
 # Data
 In this analysis, we used the dataset from National Supported Work Demonstration and included only male participants. This dataset contains several variables that are useful in assessing whether the job training for disadvantage workers is helpful in improving income.The response variable in this analysis is re78 minus re74, annual earnings difference between 1974 and 1978. Potential predictor variables in this analysis includes treatment (received training or non), years of education, marital status, and racial identity (Black or Hispanic), and annual earnings in 1975. The treatment group in this analysis includes individuals who received training. Control group includes participants who didn't received training and was below the poverty line in 1975. We conducted exploratory data analysis between the response and predictor variables prior to constructing the statistical models, and this section demonstrates a few variables that could be significant to our statistical models. 
 
-We started exploring the dataset by observing the univairate relationship between reponse and predictor variables.
+We started exploring the dataset by observing the uni-variate relationship between the response and predictor variables. Two predictor variables, black and married, dispalyed interesting pattern against the response variable. 
 
 ```{r, echo = FALSE}
 ggplot(data, aes(x=black, y=re78)) + geom_boxplot() + ggtitle("Black vs. re78") + theme(plot.title = element_text(hjust = 0.5))
 
 ggplot(data, aes(x=married, y=re78)) + geom_boxplot() + ggtitle("Married vs. re78") + theme(plot.title = element_text(hjust = 0.5))
 ```
+
+After exploring the uni-variate relationship, we also explored the interactions between variables. 
+
 ```{r, echo = FALSE}
 ggplot(data, aes(x=treat, y=re78)) + geom_boxplot() + facet_wrap(~black, ncol=4) + ggtitle("Treament vs. re78 By Black") + theme(plot.title = element_text(hjust = 0.5))
 ```
@@ -73,32 +76,64 @@ Our final model is looking goooooood now. Talk about assumptions again. Why is i
 model interpretation: 
 Every dollar increased in pre-treatment earnings in 1974 
 
+tried re78 by itself it didn't work because of 0-inflation. Then we tried add re74 as predictor, tried to control for it, which explains a lot of variance but still ran into 0-inflation issue. New variable is re78-re74, reduce effects of 0-inflation problems. Leads to actual analysis.
 
------------------TODO center data, remove outliers--------------------
+# ---------------------------------------------------------------------------------------------
 
-Call:
-lm(formula = re78 ~ treat + re74 + educ + black, data = data_wo)
+Treat_age_int is the final model 
 
-Residuals:
-   Min     1Q Median     3Q    Max 
--13513  -4808  -1609   3864  28231 
+Model assessment:
+residual vs. fitted: good distribution, satisify assumption
+normal  Q-Q: satisfy 
+Scale-location: good
+won't remove outliers because they are not influential according to cook's distance.
 
-Coefficients:
-              Estimate Std. Error t value Pr(>|t|)    
-(Intercept)  1.716e+03  1.110e+03   1.547 0.122463    
-treat1       1.236e+03  7.272e+02   1.700 0.089720 .  
-re74         3.605e-01  4.392e-02   8.209 1.34e-15 ***
-educ         3.435e+02  1.025e+02   3.350 0.000857 ***
-black1      -1.549e+03  6.820e+02  -2.272 0.023460 *  
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+We have VIF greater than 5, it's not bad, not meaningful. because variable greater than 5 is categorical. No multilinearity issue. 
 
-Residual standard error: 6531 on 606 degrees of freedom
-Multiple R-squared:  0.1463,	Adjusted R-squared:  0.1407 
-F-statistic: 25.97 on 4 and 606 DF,  p-value: < 2.2e-16
+Interpret coefficient:
 
+Quantify the effect of the treatment, that is, receiving job training, on real annual earnings.
+
+What is a likely range for the effect of training?
+Interaction between treatment and age explain most of the variance, it is more meaningful than treatment by itself.
+Confidence interval for treatment (-9268, 95), and treatment interaction with age (85, 427). People who received training and older are associated with getting wage increase. Elderly benefit more from treatment.
+
+Is there any evidence that the effects differ by demographic groups?
+anova()
+Effects of treatment only differ by age group but not by race.
+
+Are there other interesting associations with wages that are worth mentioning?
+Not so much lol
 
 ## Part II
+Experimented with:
+we started with stepwise AIC, null is treat only, full is all mean effects except re78 and re75. 
+Step-wise came up with treatment, age, 74, black.  
+
+Tested interaction first --> most of them not sig --> but age*treatment is sig
+Anova test for interactions, between black, married, Hispanic. vs. treatment
+None of which is significant, so not inlcuding these in the model. (Answered question 2)
+
+Quantify the effect of the treatment, that is, receiving job training, on the odds of having non-zero wages.
+treatment is significant, 0.22 (exp(coef)), treatment is offered, 
+treatment with age is also sig, 1.076 (exp(coef)), 
+
+What is a likely range for the effect of training?
+confidence interval, includes 0, so effect could either be postiive or negative, so we can't conclude anything.
+
+Is there any evidence that the effects differ by demographic groups?
+see above
+
+Are there other interesting associations with positive wages that are worth mentioning?
+Age is significant to the model. 
+
+Age is significant in model, 
+
+Final: age_int
+conclusion: treatment is insignificant as predictor, and useless
 
 # Conclusion
+part 1, part2, combine the two
+treatment influential in terms of increase in salary, but not influential in terms of getting a job. 
+part 1 and part 2 are consistent, age plays an influential part in both model. 
 
