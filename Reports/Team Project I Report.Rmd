@@ -5,21 +5,46 @@ date: "9/25/2021"
 output:
   pdf_document: default
 ---
+
+```{r, echo = FALSE, include=FALSE}
+#import data files and clean data
+rm(list = ls())
+
+library(ggplot2)
+library(MASS)
+library(rms)
+
+data <- read.csv("../Data/lalondedata.txt", sep=',')
+
+data$treat <- as.factor(data$treat)
+data$black <- as.factor(data$black)
+data$hispan <- as.factor(data$hispan)
+data$married <- as.factor(data$married)
+data$nodegree <- as.factor(data$nodegree)
+data$diff_re <- data$re78 - data$re75
+```
+
 # Summary
 Part 1
 Part 2
 
 # Introduction
-re78 response, control for re74. It is used to capture the before and after effect of the treatment
+
+Many public policy programs in the United States aimed to help improve personal income. In order to evaluate the effectiveness of these public policy programs, a group of researchers conducted several randomized experiments with the programs in the 1970s. We closely examined the experiment National Supported  Work (NSW) Demonstration in this analysis. Participants of this experiment were randomly assigned to recieve job training. Using data from this experiment, researchers attempted to assess the effectiveness of job training for disadvantaged workers in increasing their wages. This analysis focused on investigating two topics of interest. First, is there evidence that workers who receive job training tend to earn higher wages than workers who do not receive job training? Second, is there evidence that workers who receive job training tend to be more likely to have positive (non-zero) wages than workers who do not receive job training? To answer these questions, we used statistical models such as linear regression and logistic regression to infer the relationship between the response variable, wage difference between 1974 and 1978, and the predictor variables such as treatment, educational background, racial identity, etc.
 
 # Data
-uni variate, check all variables individually against re78 (response). And only a few that's interesting 
-black vs. re78
-married vs. re78
+In this analysis, we used the dataset from National Supported Work Demonstration and included only male participants. This dataset contains several variables that are useful in assessing whether the job training for disadvantage workers is helpful in improving income.The response variable in this analysis is re78 minus re74, annual earnings difference between 1974 and 1978. Potential predictor variables in this analysis includes treatment (received training or non), years of education, marital status, and racial identity (Black or Hispanic), and annual earnings in 1975. The treatment group in this analysis includes individuals who received training. Control group includes participants who didn't received training and was below the poverty line in 1975. We conducted exploratory data analysis between the response and predictor variables prior to constructing the statistical models, and this section demonstrates a few variables that could be significant to our statistical models. 
 
-any interactions with treatment,
-re78 vs treatment by black and non-black
+We started exploring the dataset by observing the univairate relationship between reponse and predictor variables.
 
+```{r, echo = FALSE}
+ggplot(data, aes(x=black, y=re78)) + geom_boxplot() + ggtitle("Black vs. re78") + theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(data, aes(x=married, y=re78)) + geom_boxplot() + ggtitle("Married vs. re78") + theme(plot.title = element_text(hjust = 0.5))
+```
+```{r, echo = FALSE}
+ggplot(data, aes(x=treat, y=re78)) + geom_boxplot() + facet_wrap(~black, ncol=4) + ggtitle("Treament vs. re78 By Black") + theme(plot.title = element_text(hjust = 0.5))
+```
 
 # Model
 
