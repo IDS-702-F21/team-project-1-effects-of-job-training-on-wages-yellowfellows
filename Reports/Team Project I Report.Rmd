@@ -112,28 +112,40 @@ Step-wise came up with treatment, age, 74, black.
 
 Tested interaction first --> most of them not sig --> but age*treatment is sig
 Anova test for interactions, between black, married, Hispanic. vs. treatment
-None of which is significant, so not inlcuding these in the model. (Answered question 2)
+None of which is significant, so not including these in the model. (Answered question 2)
 
 Quantify the effect of the treatment, that is, receiving job training, on the odds of having non-zero wages.
 treatment is significant, 0.22 (exp(coef)), treatment is offered, 
 treatment with age is also sig, 1.076 (exp(coef)), 
 
 What is a likely range for the effect of training?
-confidence interval, includes 0, so effect could either be postiive or negative, so we can't conclude anything.
+confidence interval, includes 0, so effect could either be positive or negative, so we can't conclude anything.
 
 Is there any evidence that the effects differ by demographic groups?
-see above
+Evidence provided by Anova test. Racial identities are not significant to the model. But interaction between treatment and age is significant.When given a treatment, the increase in age is associated with an increase in odds of receiving positive salary increase. Increased by roughly 7.6%.
+
+This effect is in addition to the other association we observed between age and the odds of positive salary. When age is as a variable by itself, it is also significant. When age increase by 1 year, it's associated with decrease in odds of receiving positive salary. Decrease is 5.2%.
 
 Are there other interesting associations with positive wages that are worth mentioning?
-Age is significant to the model. 
+For every additional thousand dollar they earned 974, it is associated with 7% increase in the odds of earning positive salary in 1978. 
+When the participant is identified as Black, their odds ratio of earning positive salary is 46.3% lower in comparison to a non-black participant. 
 
-Age is significant in model, 
-
-Final: age_int
-conclusion: treatment is insignificant as predictor, and useless
+Final model: age_int
 
 # Conclusion
+Part 1 conclusion:
+Recap of model 1
+
+Part 2 conclusion:
+Recap of model 2
+
 part 1, part2, combine the two
-treatment influential in terms of increase in salary, but not influential in terms of getting a job. 
-part 1 and part 2 are consistent, age plays an influential part in both model. 
+Treatment influential in terms of increase in salary, but not influential in terms of getting a job. 
+Effect of treatment (part 1 and part 2) is not contingent upon race. 
+Age and treatment interaction is significant in both model. it means that when given a treatment, age is associated with the increase in salary and the odds of getting a job. (Most important!!!)
+
+Limitation of our model:None we are perfect, Michael should give us 100% with EC
+Part1: linear regression model has terrible R2 value. R2 is 0.13. This indicates that we only accounted for 13% of the variance in the model, which means that there are other variables that we could explore to improve on the model. 
+
+Future stuff: If more time permitted and more data available, we would like to perform a linear regression on a more complete data set.
 
