@@ -182,3 +182,32 @@ summary(age_int)
 confint(age_int)
 exp(confint(age_int))
 exp(age_int$coefficients)
+
+
+##########################################################################
+############################### 5. Extra #################################
+##########################################################################
+
+
+treat <- rep(1, 120)
+black <- rep(1, 120)
+age <- 1:60
+re74 <- mean(data$re74)
+new_data <- data.frame(treat, black, age, re74)
+new_data[60:120, 1] <- 0
+new_data$black <- as.factor(new_data$black)
+new_data$treat <- as.factor(new_data$treat)
+
+new_data$prediction <- predict(age_int, new_data, "response")
+
+ggplot(new_data, aes(x = age, y = prediction)) + 
+  geom_point(aes(color = treat, linetype = treat)) + 
+  scale_color_manual(values = c("darkred", "steelblue")) + theme_classic()
+
+
+
+
+
+
+
+
