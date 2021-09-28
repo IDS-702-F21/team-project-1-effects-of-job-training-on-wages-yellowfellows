@@ -10,7 +10,7 @@ library(rms)
 ##########################################################################
 
 
-data <- read.csv("lalondedata.txt", sep=',')
+data <- read.csv("Data/lalondedata.txt", sep=',')
 
 head(data)
 str(data)
@@ -211,6 +211,19 @@ plot(step_model, which=5)             # several outliers
 plot(data$educ, step_model$residuals) # linearity assumption holds
 plot(data$age, step_model$residuals)
 vif(step_model)                       # no multicollinearity
+
+# In pretty:
+tempdf = data.frame(fitted=fitted(step_model), residuals=residuals(step_model))
+ggplot(data=tempdf, aes(x=fitted, y=residuals)) + 
+  geom_abline(slope=0, intercept=0, color='#aaaaaa', linetype='dashed') +
+  geom_point(color='#061953') + 
+  theme_classic() + 
+  labs(x="Fitted Values", y="Residuals") + 
+  ggtitle("Residuals vs. Fitted Plot") + 
+  theme(plot.title=element_text(size=16, face='bold', hjust=0.5)) +
+  scale_y_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k")) +
+  #scale_x_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k")) +
+
 
 # Log_age model
 plot(log_age_model, which=1)             
