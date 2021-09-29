@@ -186,7 +186,8 @@ step_model <- step(null_model,
                    trace=0)
 summary(step_model)
 
-############################ PRETTY TABLE ############################
+########################## PRETTY TABLE BELOW ############################
+
 summary_step = summary(step_model)
 summaryprint = data.frame(summary_step$coefficients)
 
@@ -198,17 +199,17 @@ colnames(summarydf) = c("Estimate","Std. Error","t value", "Pr(>|t|)","")
 knitr::kable(summarydf, format="latex", booktabs=TRUE) %>% 
   kable_styling(latex_options=c("hold_position", "scale_down"))
 
-######################################################################
+##########################################################################
 
 treat_age_int <- lm(diff_re ~ treat + age + married + treat * age, data=data)
 anova(step_model, treat_age_int) # ***
 
-############################ PRETTY TABLE ############################
+########################## PRETTY TABLE BELOW ############################
 
 ftest = anova(step_model, treat_age_int)
 xtable(ftest)
 
-######################################################################
+##########################################################################
 
 treat_mar_int <- lm(diff_re ~ treat + age + married + treat * married, data=data)
 anova(step_model, treat_mar_int)
@@ -327,9 +328,10 @@ vif(treat_age_int)
 summary(treat_age_int)
 
 
-############################ PRETTY TABLE ############################
+########################## PRETTY TABLE BELOW ############################
+# print final model summary
+
 summary_final = summary(treat_age_int)
-summary_final
 summaryprint = data.frame(summary_final$coefficients)
 
 stars = c("***",".", "***", "*", "**")
@@ -340,7 +342,14 @@ colnames(summarydf) = c("Estimate","Std. Error","t value", "Pr(>|t|)","")
 knitr::kable(summarydf, format="latex", booktabs=TRUE) %>% 
   kable_styling(latex_options="hold_position")
 
-######################################################################
+# print final model confidence interval
+
+confintdf = data.frame(round(confint(treat_age_int, level = 0.95),2))
+colnames(confintdf) = c("Lower Bound", "Upper Bound")
+knitr::kable(confintdf, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options=("hold_position"))
+
+##########################################################################
 
 
 ##########################################################################
