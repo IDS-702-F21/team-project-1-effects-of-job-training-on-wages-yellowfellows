@@ -3,6 +3,9 @@ rm(list = ls())
 library(ggplot2)
 library(MASS)
 library(rms)
+library(xtable)
+library(knitr)
+library(kableExtra)
 
 
 ##########################################################################
@@ -183,8 +186,29 @@ step_model <- step(null_model,
                    trace=0)
 summary(step_model)
 
+############################ PRETTY TABLE ############################
+summary_step = summary(step_model)
+summaryprint = data.frame(summary_step$coefficients)
+
+stars = c("***", "**", "**", "*")
+starsdf = data.frame(stars)
+
+summarydf = data.frame(cbind(round(summaryprint,2),starsdf))
+colnames(summarydf) = c("Estimate","Std. Error","t value", "Pr(>|t|)","")
+knitr::kable(summarydf, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options=c("hold_position", "scale_down"))
+
+######################################################################
+
 treat_age_int <- lm(diff_re ~ treat + age + married + treat * age, data=data)
 anova(step_model, treat_age_int) # ***
+
+############################ PRETTY TABLE ############################
+
+ftest = anova(step_model, treat_age_int)
+xtable(ftest)
+
+######################################################################
 
 treat_mar_int <- lm(diff_re ~ treat + age + married + treat * married, data=data)
 anova(step_model, treat_mar_int)
@@ -291,6 +315,22 @@ plot(data$educ, treat_age_int$residuals)
 plot(data$age, treat_age_int$residuals)
 vif(treat_age_int)
 summary(treat_age_int)
+
+
+############################ PRETTY TABLE ############################
+summary_final = summary(treat_age_int)
+summary_final
+summaryprint = data.frame(summary_final$coefficients)
+
+stars = c("***",".", "***", "*", "**")
+starsdf = data.frame(stars)
+
+summarydf = data.frame(cbind(round(summaryprint,2),starsdf))
+colnames(summarydf) = c("Estimate","Std. Error","t value", "Pr(>|t|)","")
+knitr::kable(summarydf, format="latex", booktabs=TRUE) %>% 
+  kable_styling(latex_options="hold_position")
+
+######################################################################
 
 
 ##########################################################################
