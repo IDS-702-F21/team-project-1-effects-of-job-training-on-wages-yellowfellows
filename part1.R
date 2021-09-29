@@ -201,7 +201,7 @@ anova(treat_age_int, race)
 ############################### 3.Model assessment #######################
 ##########################################################################
 
-
+par(bty='n')
 summary(step_model)                   
 plot(step_model, which=1)             # equal variance and independence assum problem
 plot(step_model, which=2)             # normality assumption?
@@ -213,6 +213,7 @@ plot(data$age, step_model$residuals)
 vif(step_model)                       # no multicollinearity
 
 # In pretty:
+# resid vs. fitted
 tempdf = data.frame(fitted=fitted(step_model), residuals=residuals(step_model))
 ggplot(data=tempdf, aes(x=fitted, y=residuals)) + 
   geom_abline(slope=0, intercept=0, color='#aaaaaa', linetype='dashed') +
@@ -221,8 +222,22 @@ ggplot(data=tempdf, aes(x=fitted, y=residuals)) +
   labs(x="Fitted Values", y="Residuals") + 
   ggtitle("Residuals vs. Fitted Plot") + 
   theme(plot.title=element_text(size=16, face='bold', hjust=0.5)) +
-  scale_y_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k")) +
-  #scale_x_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k")) +
+  scale_y_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k"))
+  
+
+# QQ-plot
+ggplot(data=tempdf, aes(sample=residuals)) + 
+  stat_qq_line(linetype='dashed', color="#888888") + 
+  stat_qq(color='#061953') + 
+  theme_classic() +
+  labs(x="Theoretical Quantiles", y="Empirical Quantiles") + 
+  ggtitle("Residuals QQ-Plot") + 
+  theme(plot.title=element_text(size=16, face='bold', hjust=0.5)) +
+  scale_y_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k"))
+
+# Cooks dist
+plot(step_model, which=5, pch=16, col='#061953', cex=0.8, sub="")             
+
 
 
 # Log_age model
