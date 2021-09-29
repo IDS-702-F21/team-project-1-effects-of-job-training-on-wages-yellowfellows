@@ -262,6 +262,16 @@ ggplot(data=tempdf, aes(sample=residuals)) +
 # Cooks dist
 plot(step_model, which=5, pch=16, col='#061953', cex=0.8, sub="")             
 
+# Resid vs. age
+tempdf = data.frame(age=data$age, residuals=residuals(step_model))
+ggplot(data=tempdf, aes(y=residuals, x=age)) +
+  geom_abline(slope=0, intercept=0, color='#aaaaaa', linetype='dashed') +
+  geom_point(color='#061953') + 
+  theme_classic() +
+  labs(x="Age", y="Residuals") + 
+  ggtitle("Residuals vs. Age") + 
+  theme(plot.title=element_text(size=16, face='bold', hjust=0.5)) +
+  scale_y_continuous(labels= function(x) paste("$", as.numeric(x)/1000, "k"))
 
 
 # Log_age model
