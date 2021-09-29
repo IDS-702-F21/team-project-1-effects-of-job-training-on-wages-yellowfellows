@@ -11,6 +11,21 @@ plt.rcParams['font.family'] = "Arial"
 df = pd.read_csv("../Data/lalondedata.txt")
 
 # %%
+
+df['race'] = np.select(
+    [
+        df.black == 1,
+        df.hispan == 1,
+    ],
+    ['black', 'hispan'],
+    default='other'
+)
+
+df['race'] = df['race'].astype('category')
+df = df.assign(diff_re=df['re78'] - df['re74'])
+
+
+# %%
 # Distribution of re78
 fig, ax = plt.subplots(figsize=(10, 8))
 ax.hist(
@@ -31,19 +46,7 @@ sns.despine()
 plt.savefig("./re78_distribution.png", dpi=300, facecolor='white')
 plt.close()
 
-# %%
 
-df['race'] = np.select(
-    [
-        df.black == 1,
-        df.hispan == 1,
-    ],
-    ['black', 'hispan'],
-    default='other'
-)
-
-df['race'] = df['race'].astype('category')
-df = df.assign(diff_re=df['re78'] - df['re74'])
 
 # %%
 sns.boxplot(data=df, x='treat', y='diff_re', hue='race')
@@ -109,15 +112,13 @@ result_df = pd.DataFrame(result_mtx, index=ages)
 # %%
 
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.set(
-    # xlim=(min(ages), 90)
-)
+
 
 config = {
-    "married_0+treated_1": dict(color="#03529B", annot="treated & not married"),
-    "married_1+treated_1": dict(color="#061953", annot="treated & married"),
-    "married_0+treated_0": dict(color="red", annot="not treated & not married"),
-    "married_1+treated_0": dict(color="darkred", annot="not treated & married"),
+    "married_0+treated_1": dict(color="#03529B", annot="Treated + Not Married"),
+    "married_1+treated_1": dict(color="#061953", annot="Treated + Married"),
+    "married_0+treated_0": dict(color="red", annot="Not Treated + Not Married"),
+    "married_1+treated_0": dict(color="darkred", annot="Not Treated + Married"),
 }
 
 for key, val in config.items():
