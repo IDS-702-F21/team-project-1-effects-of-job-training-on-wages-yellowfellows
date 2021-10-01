@@ -30,7 +30,8 @@ data$married <- as.factor(data$married)
 data$nodegree <- as.factor(data$nodegree)
 data$pos_income <- as.integer(data$re78 > 0)
 data$pos_income_f <- as.factor(data$pos_income)
-
+data$re74_bin <- ifelse(data$re74>0, 1, 0)
+data$re74_bin <- as.factor(data$re74_bin)
 
 ##########################################################################
 ############################### 1. EDA ###################################
@@ -57,6 +58,9 @@ chisq.test(table(data[,c("pos_income_f", "married")]))
 
 cond_prob(data, "pos_income_f",  "nodegree")
 chisq.test(table(data[,c("pos_income_f", "nodegree")]))
+
+cond_prob(data, "pos_income_f",  "re74_bin")
+chisq.test(table(data[,c("pos_income_f", "re74_bin")])) # **
 
 
 ggplot(data,aes(x=pos_income_f, y=age, fill=pos_income_f)) +
@@ -86,11 +90,11 @@ cond_prob(data[data$black == 0,], "pos_income_f",  "treat")
 table(data[, c("treat", "black")])
 
 
-cond_prob(data[data$hispan == 1,], "pos_income_f",  "treat")   
-cond_prob(data[data$hispan == 0,], "pos_income_f",  "treat")
+cond_prob(data[data$hispan == 1,], "pos_income_f",  "treat")  # no data points 
+cond_prob(data[data$hispan == 0,], "pos_income_f",  "treat")  # treat1 pos_income0
 
 data$sum_r <- (as.integer(data$black) - 1) + (as.integer(data$hispan) - 1)
-table(data$sum_r)
+table(data$sum_r) # unique race
 
 cond_prob(data[data$married == 1,], "pos_income_f",  "treat")  # ** 
 cond_prob(data[data$married == 0,], "pos_income_f",  "treat")
@@ -173,10 +177,10 @@ roc(data$pos_income_f, fitted(age_int),
     plot=T, print.thres="best", legacy.axes=T,
     print.auc =T, col="red3")
 
-age_int_matrix <- confusionMatrix(as.factor(ifelse(fitted(age_int) >= 0.737, "1", "0")),
+age_int_matrix_best_level <- confusionMatrix(as.factor(ifelse(fitted(age_int) >= 0.737, "1", "0")),
                                      data$pos_income_f, positive = "1")
-age_int_matrix$overall["Accuracy"]
-age_int_matrix$byClass[c("Sensitivity","Specificity")]
+age_int_matrix_best_level$overall["Accuracy"]
+age_int_matrix_best_level$byClass[c("Sensitivity","Specificity")]
 
 summary(age_int)
 confint(age_int)
@@ -205,9 +209,53 @@ ggplot(new_data, aes(x = age, y = prediction)) +
   scale_color_manual(values = c("darkred", "steelblue")) + theme_classic()
 
 
+##########################################################################
+############################### 6. Extra 2 ###############################
+##########################################################################
 
 
+# Cubic transformation
+age_int_cub <- glm(pos_income_f ~ treat + black + 
+                     poly(age, 3) + re74 + treat * age,
+                   data=data, family=binomial)
+rawresid2 <- residuals(age_int_cub, "resp")
+binnedplot(x=fitted(age_int_cub),y=rawresid2,
+           xlab="Pred. probabilities",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
+
+binnedplot(x=data$age,y=rawresid2,
+           xlab="Age",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy") # don't think it is helpful
+
+binnedplot(x=data$re74,y=rawresid2,
+           xlab="Age",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
+
+roc(data$pos_income_f, fitted(age_int_cub),
+    plot=T, print.thres="best", legacy.axes=T,
+    print.auc =T, col="red3") # not changing AUC 
 
 
+# Binary re74 instead of continuous
+age_int_bin <- glm(pos_income_f ~ treat + black + 
+                 age + re74_bin + treat * age,
+               data=data, family=binomial)
+
+rawresid3 <- residuals(age_int_bin, "resp")
+binnedplot(x=fitted(age_int_bin),y=rawresid3,
+           xlab="Pred. probabilities",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
+
+binnedplot(x=data$age,y=rawresid3,
+           xlab="Age",
+           col.int="red4", ylab="Avg. residuals",
+           main="Binned residual plot", col.pts="navy")
 
 
+roc(data$pos_income_f, fitted(age_int_bin),
+    plot=T, print.thres="best", legacy.axes=T,
+    print.auc =T, col="red3") # AUC is lower than our model
