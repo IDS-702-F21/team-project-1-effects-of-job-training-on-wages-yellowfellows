@@ -1,14 +1,8 @@
 ---
 title: \vspace{-1.5cm} **IDS702 Team Yellow Project I**
-author: 
-  - Anna Dai
-  - Athena Liu
-  - Dauren Bizhanov
-  - Himangshu Ray Bhantana
-  - Moritz Wilksch
+author: Anna Dai, Athena Liu, Dauren Bizhanov, Himangshu Ray Bhantana, Moritz Wilksch
 date: October 07, 2021
 output: pdf_document
-
 ---
 
 
