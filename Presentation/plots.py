@@ -64,7 +64,7 @@ fg = sns.catplot(
     medianprops=dict(color="white"),
     flierprops=dict(marker="x"),
     height=4,
-    aspect=4,
+    aspect=6,
     orient='h'
 )
 
@@ -84,7 +84,7 @@ for ax in fg.axes.ravel():
     # ax.axvline(0, ls='--', alpha=0.4, color='black', zorder=0)
 fg.axes.ravel()[-1].set_xlabel("\nDifference between $re78 - re74$")
 plt.tight_layout()
-plt.savefig("interaction_treat_race.png", dpi=300, facecolor="white")
+plt.savefig("interaction_treat_race_wide.png", dpi=300, facecolor="white")
 
 # %%
 
