@@ -1,18 +1,48 @@
 ---
-title: "IDS702 Team Project I Yellow"
-author: "Athena Liu, Anna Dai, Moritz Wilksch, Dauren Bizhanov, Himangshu Ray Bhantana"
-date: "9/25/2021"
-output:
-  pdf_document: default
+title: \vspace{-1.5cm} **IDS702 Team Yellow Project I**
+author: 
+  - Anna Dai
+  - Athena Liu
+  - Dauren Bizhanov
+  - Himangshu Ray Bhantana
+  - Moritz Wilksch
+date: October 07, 2021
+output: pdf_document
+
 ---
 
-```{r, echo = FALSE, include=FALSE}
-#import data files and clean data
-rm(list = ls())
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 
 library(ggplot2)
 library(MASS)
 library(rms)
+library(readr)
+library(GGally)
+library(knitr)
+library(xtable)
+options(xtable.comment = FALSE, xtable.floating = FALSE)
+library(kableExtra)
+library(arm)
+library(pROC)
+library(e1071)
+library(caret)
+library(gridExtra)
+library(dplyr)
+library(stargazer)
+library(car)
+
+```
+
+
+```{r, echo = FALSE, include=FALSE}
+#import data files and clean data
+rm(list = ls())
 
 data <- read.csv("../Data/lalondedata.txt", sep=',')
 
@@ -25,127 +55,10 @@ data$diff_re <- data$re78 - data$re75
 ```
 
 # Summary
-Part 1
-Part 2
+
+In this study, we examine whether there is evidence that employees who receive job training earn better wages than those who did not receive training. We use linear regression to study the relationship between earning differences and variables such as job training, educational background, and racial identity. We find that while the job training itself does not have a significant effect on the earnings difference between 1974 and 1978 at zero-age, it significantly affects the relationship that age has on the earnings difference. For treated individuals, an increase in age is associated with an increase in earnings difference, while the opposite is true for untreated individuals. This trend is not affected by race, years of schooling, a lack of a degree, or marital status. Overall, it is reasonable to conclude that the treatment's impact differs mostly by age group and not by any other demographic variables.  
+To not just study the pre and post-training difference in income, we use a logistic regression model to examine whether job training is associated with a higher odds ratio of having a non-zero income in 1978. We find that treatment at age zero, being black, and an increase in age (without treatment) are all associated with lower odds of earning a non-zero income, whereas the pre-training income and an increase in age for treated people are associated with higher odds.
 
 # Introduction
 
-Many public policy programs in the United States aimed to help improve personal income. In order to evaluate the effectiveness of these public policy programs, a group of researchers conducted several randomized experiments with the programs in the 1970s. We closely examined the experiment National Supported  Work (NSW) Demonstration in this analysis. Participants of this experiment were randomly assigned to recieve job training. Using data from this experiment, researchers attempted to assess the effectiveness of job training for disadvantaged workers in increasing their wages. This analysis focused on investigating two topics of interest. First, is there evidence that workers who receive job training tend to earn higher wages than workers who do not receive job training? Second, is there evidence that workers who receive job training tend to be more likely to have positive (non-zero) wages than workers who do not receive job training? To answer these questions, we used statistical models such as linear regression and logistic regression to infer the relationship between the response variable, wage difference between 1974 and 1978, and the predictor variables such as treatment, educational background, racial identity, etc.
-
 # Data
-In this analysis, we used the dataset from National Supported Work Demonstration and included only male participants. This dataset contains several variables that are useful in assessing whether the job training for disadvantage workers is helpful in improving income.The response variable in this analysis is re78 minus re74, annual earnings difference between 1974 and 1978. Potential predictor variables in this analysis includes treatment (received training or non), years of education, marital status, and racial identity (Black or Hispanic), and annual earnings in 1975. The treatment group in this analysis includes individuals who received training. Control group includes participants who didn't received training and was below the poverty line in 1975. We conducted exploratory data analysis between the response and predictor variables prior to constructing the statistical models, and this section demonstrates a few variables that could be significant to our statistical models. 
-
-We started exploring the dataset by observing the uni-variate relationship between the response and predictor variables. Two predictor variables, black and married, dispalyed interesting pattern against the response variable. 
-
-```{r, echo = FALSE}
-ggplot(data, aes(x=black, y=re78)) + geom_boxplot() + ggtitle("Black vs. re78") + theme(plot.title = element_text(hjust = 0.5))
-
-ggplot(data, aes(x=married, y=re78)) + geom_boxplot() + ggtitle("Married vs. re78") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-After exploring the uni-variate relationship, we also explored the interactions between variables. 
-
-```{r, echo = FALSE}
-ggplot(data, aes(x=treat, y=re78)) + geom_boxplot() + facet_wrap(~black, ncol=4) + ggtitle("Treament vs. re78 By Black") + theme(plot.title = element_text(hjust = 0.5))
-```
-
-# Model
-
-## Part I
-model experimented with (baseline model base on EDA)
-baseline_model <- lm(re78 ~ treat + married + black + black*treat, data=data) (reference)
-started without re74, used predictors we found interesting based on the EDA. model really bad
-
-Used AIC model selection algorithm
-null model, just treatment
-full model, all variables but not interactions
-Forward, backward, and step wise - backward gave constant model, so examine forward and step wise model only. They gave the same model. Also not looking hot. R squared is not good, actual shape of residual plot not good, assumptions not satisfied
-
-Performed another AIC step wise. same null model, full model now includes any interactions with treatment and predictors that we found significant previously. No interactions were kept. 
-
-At this point, we looked at transformation. And, to eliminate the effects of 0 in the data, we added one to all the points in re78. Then we log transformation re78. But, the results were even more horrifying. 
-
-Final model.
-re74, that what improved the model.
-
-How did we spotted the outliers? Cook distance, spot high leverage outlier, not high influence
-Outliers removed. Waiting for new plot on Monday. Index specific outlier, what they are, why is it okay to remove them?
-
-Our final model is looking goooooood now. Talk about assumptions again. Why is it better? It use to be 0.03 which is complete trash. Lol even 0.14 is not good, we feel done with this model. 
-
-model interpretation: 
-Every dollar increased in pre-treatment earnings in 1974 
-
-tried re78 by itself it didn't work because of 0-inflation. Then we tried add re74 as predictor, tried to control for it, which explains a lot of variance but still ran into 0-inflation issue. New variable is re78-re74, reduce effects of 0-inflation problems. Leads to actual analysis.
-
-# ---------------------------------------------------------------------------------------------
-
-Treat_age_int is the final model 
-
-Model assessment:
-residual vs. fitted: good distribution, satisify assumption
-normal  Q-Q: satisfy 
-Scale-location: good
-won't remove outliers because they are not influential according to cook's distance.
-
-We have VIF greater than 5, it's not bad, not meaningful. because variable greater than 5 is categorical. No multilinearity issue. 
-
-Interpret coefficient:
-
-Quantify the effect of the treatment, that is, receiving job training, on real annual earnings.
-
-What is a likely range for the effect of training?
-Interaction between treatment and age explain most of the variance, it is more meaningful than treatment by itself.
-Confidence interval for treatment (-9268, 95), and treatment interaction with age (85, 427). People who received training and older are associated with getting wage increase. Elderly benefit more from treatment.
-
-Is there any evidence that the effects differ by demographic groups?
-anova()
-Effects of treatment only differ by age group but not by race.
-
-Are there other interesting associations with wages that are worth mentioning?
-Not so much lol
-
-## Part II
-Experimented with:
-we started with stepwise AIC, null is treat only, full is all mean effects except re78 and re75. 
-Step-wise came up with treatment, age, 74, black.  
-
-Tested interaction first --> most of them not sig --> but age*treatment is sig
-Anova test for interactions, between black, married, Hispanic. vs. treatment
-None of which is significant, so not including these in the model. (Answered question 2)
-
-Quantify the effect of the treatment, that is, receiving job training, on the odds of having non-zero wages.
-treatment is significant, 0.22 (exp(coef)), treatment is offered, 
-treatment with age is also sig, 1.076 (exp(coef)), 
-
-What is a likely range for the effect of training?
-confidence interval, includes 0, so effect could either be positive or negative, so we can't conclude anything.
-
-Is there any evidence that the effects differ by demographic groups?
-Evidence provided by Anova test. Racial identities are not significant to the model. But interaction between treatment and age is significant.When given a treatment, the increase in age is associated with an increase in odds of receiving positive salary increase. Increased by roughly 7.6%.
-
-This effect is in addition to the other association we observed between age and the odds of positive salary. When age is as a variable by itself, it is also significant. When age increase by 1 year, it's associated with decrease in odds of receiving positive salary. Decrease is 5.2%.
-
-Are there other interesting associations with positive wages that are worth mentioning?
-For every additional thousand dollar they earned 974, it is associated with 7% increase in the odds of earning positive salary in 1978. 
-When the participant is identified as Black, their odds ratio of earning positive salary is 46.3% lower in comparison to a non-black participant. 
-
-Final model: age_int
-
-# Conclusion
-Part 1 conclusion:
-Recap of model 1
-
-Part 2 conclusion:
-Recap of model 2
-
-part 1, part2, combine the two
-Treatment influential in terms of increase in salary, but not influential in terms of getting a job. 
-Effect of treatment (part 1 and part 2) is not contingent upon race. 
-Age and treatment interaction is significant in both model. it means that when given a treatment, age is associated with the increase in salary and the odds of getting a job. (Most important!!!)
-
-Limitation of our model:None we are perfect, Michael should give us 100% with EC
-Part1: linear regression model has terrible R2 value. R2 is 0.13. This indicates that we only accounted for 13% of the variance in the model, which means that there are other variables that we could explore to improve on the model. 
-
-Future stuff: If more time permitted and more data available, we would like to perform a linear regression on a more complete data set.
-
