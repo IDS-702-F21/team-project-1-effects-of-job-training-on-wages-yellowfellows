@@ -64,7 +64,7 @@ fg = sns.catplot(
     medianprops=dict(color="white"),
     flierprops=dict(marker="x"),
     height=4,
-    aspect=6,
+    aspect=8,
     orient='h'
 )
 
@@ -78,8 +78,8 @@ for ax in fg.axes.ravel():
     # rest
     ax.set_title(ax.get_title(), size=26, weight='bold')
     ax.xaxis.set_major_formatter(lambda x, _: f"${x/1000:.0f}k")
-    ax.text(s="No Treatment", x=40_000, y=0, color='#03529B', size=20, weight='bold', va='center')
-    ax.text(s="Treatment", x=40_000, y=1, color='#061953', size=20, weight='bold', va='center')
+    ax.text(s="No Treatment", x=40_000, y=0, color='#03529B', size=24, weight='bold', va='center')
+    ax.text(s="Treatment", x=40_000, y=1, color='#061953', size=24, weight='bold', va='center')
 
     # ax.axvline(0, ls='--', alpha=0.4, color='black', zorder=0)
 fg.axes.ravel()[-1].set_xlabel("\nDifference between $re78 - re74$")
