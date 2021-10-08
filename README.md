@@ -11,10 +11,10 @@
 |Athena Liu| Writer | [GitHub Profile](https://github.com/athena112233)|
 
 ## Part I
-We conduct a statistical analysis on the effect that job training for disatvantaged workers has on employee's wages
+We conduct a statistical analysis on the effect that job training for disatvantaged workers has on employee's wages using a linear regression model. We regress the difference in earning pre and post training on subject's characteristics. We employ a stepwise regression process to build a parsimonious model to answer the inferential questions of interest. The detailed analysis is available in `Reports/Team-Project-I-Report.pdf`
 
 ## Part II
-TBD
+To further scrutinize the relationship between job training and worker's wages, we employ a logist regression model to model the likelihood of receiving a non-zero salary after having received job training. The detailed analysis is available in `Reports/Team-Project-I-Report.pdf`
 
 
 ## References
