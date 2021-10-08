@@ -1,5 +1,4 @@
 # %%
-from ipaddress import summarize_address_range
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 import numpy as np
@@ -20,6 +19,8 @@ df["race"] = np.select(
 df["race"] = df["race"].astype("category")
 df = df.assign(diff_re=df["re78"] - df["re74"])
 
+#%%
+print((pd.crosstab(df.treat, df.race, normalize='index') * 100).round(0).to_markdown())
 
 # %%
 # Distribution of re78
